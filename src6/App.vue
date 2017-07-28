@@ -21,9 +21,9 @@
 <script>
   import axios from 'axios'
   import header from './components/header/header.vue'
-
-  const OK = 0 // 数据正常标识
+  const OK = 0 // 正常标识
   export default {
+
     data () {
       return {
         seller: {}
@@ -32,20 +32,22 @@
     components: {
       'ele-header': header
     },
+
     created () {
-      // 使用vue-resource发送ajax请求
+      //1. 使用vue-resource发送ajax请求(express模拟接口)
       this.$http.get('/api/seller')
         .then(response => {
           const result = response.body
-          console.log(result)
+          console.log('vue-resource', result) //{code:0, data: seller}
         })
 
-      // 使用axios发送ajax请求
+      //2. 使用axios发送ajax请求(mockjs模拟接口)
       axios.get('/api2/seller')
         .then(response => {
           const result = response.data
-          console.log('axios', result)
-          if (result.code === OK) {
+          console.log('axios', result) //{code:0, data: seller}
+
+          if(result.code===OK) {
             this.seller = result.data
           }
         })
@@ -54,7 +56,9 @@
 </script>
 
 <style lang="stylus" rel="stylesheet/stylus">
-  @import "./common/stylus/mixin.styl"
+
+  @import "./common/styuls/mixin.styl"
+
   .tab
     display flex
     height 40px
@@ -66,8 +70,8 @@
       flex 1
       text-align center
       & > a
-        display block //不仅仅点击文字有效果
-        color rgb(77, 85, 93)
+        display block
+        color rgb(77,85,93)
         &.active
           color rgb(240,20,20)
 

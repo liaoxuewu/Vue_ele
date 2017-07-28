@@ -3,8 +3,14 @@
 import Vue from 'vue'
 import router from './router'
 import app from './app.vue'
+import VueResource from 'vue-resource'
+
+import './mock/mockServer'
 
 import './common/stylus/index.styl'
+
+// 声明使用vue插件
+Vue.use(VueResource)
 
 /* eslint-disable no-new */
 new Vue({
@@ -12,3 +18,4 @@ new Vue({
   render: h => h(app),
   router
 })
+
