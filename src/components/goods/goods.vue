@@ -38,7 +38,7 @@
                     </div>
                     <!--添加食物和删除食物按钮-->
                     <div class="cartcontrol-wrapper">
-                      cartcontrol组件
+                      <cartcontrol :food="food" :update-food-count="updateFoodCount"></cartcontrol>
                     </div>
                   </div>
                 </li>
@@ -93,7 +93,8 @@
         })
         //创建右边foods的scroll
         this.foodsScroll = new BScroll(this.$refs.foodsWrapper,{
-          probeType: 3 //手指move的时候出发scroll事件
+          probeType: 3, //手指move的时候出发scroll事件
+          click: true //响应点击事件
         })
         //监视foods的滚动
         this.foodsScroll.on('scroll',(pos) => {
@@ -126,8 +127,29 @@
         const li = lis[index]
         //滑动到对应的li
         this.foodsScroll.scrollToElement(li,300)
-      }
+      },
+
+      updateFoodCount (food,isAdd,event) {
+        //过滤到原生的回调（pc端会触发两次）
+        if(!event._constructed) {
+          return
+        }
+        if(isAdd){ //加1
+          if(!food.count){ //如果是第一次添加,food中还没有count属性
+            //food.count = 1 //添加新的属性，没有数据绑定，变化了不更新界面
+            this.$set(food,'count',1)
+          }else {
+            food.count++
+          }
+        }else { //减1
+          if(food.count){
+            food.count--
+          }
+        }
+      },
     },
+
+
     computed: {
       currIndex () {//当前被选中的menu item的下标
         const {tops,scrollY} = this
@@ -136,6 +158,9 @@
           return scrollY>=top && scrollY<tops[index+1]
         })
       }
+    },
+    components: {
+      cartcontrol
     }
   }
 

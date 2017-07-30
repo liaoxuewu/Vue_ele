@@ -1,11 +1,20 @@
 <template>
     <div class="cartcontrol">
-      <div class="cart-decrease icon-remove_circle_outline" v-if="food.count"></div>
+      <transition name="move">
+      <div class="cart-decrease icon-remove_circle_outline" v-if="food.count"
+           @click="updateFoodCount(food, false, $event)"></div>
+      </transition>
       <div class="cart-count" v-if="food.count">{{food.count}}</div>
-      <div class="cart-add icon-add_circle"></div>
+      <div class="cart-add icon-add_circle" @click="updateFoodCount(food, true, $event)"></div>
     </div>
 </template>
 <script>
+  export default {
+    props: {
+      food: Object,
+      updateFoodCount: Function
+    }
+  }
 
 </script>
 <style lang="stylus" rel="stylesheet/stylus">
