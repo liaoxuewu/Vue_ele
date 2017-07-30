@@ -1,55 +1,52 @@
 <template>
-    <div>
-      <div class="goods">
-        <!--左边分类项-->
-        <div class="menu-wrapper" ref="menuWrapper">
-          <ul>
-            <li class="menu-item" v-for="(good,index) in goods"
-                :class="{current: index===currIndex}" @click="clickMenuItem(index,$event)">
-              <!--current:true/false-->
-              <span class="text border-1px">
-                <span class="icon" v-if="good.type>=0" :class="supportClasses[good.type]"></span>{{good.name}}
-              </span>
-            </li>
-          </ul>
-        </div>
-        <!--右边食物列表-->
-        <div class="foods-wrapper" ref="foodsWrapper">
-          <ul>
-            <li class="food-list food-list-hook" v-for="good in goods">
-              <h2 class="title">{{good.name}}</h2>
-              <ul>
-                <li class="food-item border-1px" v-for="food in good.foods">
-                  <!--食物图片-->
-                  <div class="icon">
-                    <img :src="food.icon" width="57" height="57">
-                  </div>
-                  <!--食物内容-->
-                  <div class="content">
-                    <h2 class="name">{{food.name}}</h2>
-                    <p class="desc">{{food.description}}</p>
-                    <div class="extra">
-                      <span class="count">月售{{food.sellCount}}份</span>
-                      <span>好评率{{food.rating}}%</span>
-                    </div>
-                    <div class="price">
-                      <span class="now">￥{{food.price}}</span>
-                      <span class="old" v-show="food.oldPrice">￥{{food.oldPrice}}</span>
-                    </div>
-                    <!--添加食物和删除食物按钮-->
-                    <div class="cartcontrol-wrapper">
-                      cartcontrol组件
-                    </div>
-                  </div>
-                </li>
-              </ul>
-            </li>
-          </ul>
-        </div>
+  <div>
+    <div class="goods">
+      <div class="menu-wrapper" ref="menuWrapper">
+        <ul>
+          <!--current-->
+          <li class="menu-item" v-for="(good, index) in goods"
+              :class="{current: index===currIndex}" @click="clickMenuItem(index, $event)">
+            <span class="text border-1px">
+              <span class="icon" v-if="good.type>=0" :class="supportClasses[good.type]"></span>
+              {{good.name}}
+            </span>
+          </li>
+        </ul>
       </div>
-      <div>food组件</div>
+      <div class="foods-wrapper"  ref="foodsWrapper">
+        <ul>
+          <li class="food-list food-list-hook" v-for="good in goods">
+            <h1 class="title">{{good.name}}</h1>
+            <ul>
+              <li class="food-item border-1px" v-for="food in good.foods">
+                <div class="icon">
+                  <img width="57" height="57" :src="food.icon">
+                </div>
+                <div class="content">
+                  <h2 class="name">{{food.name}}</h2>
+                  <p class="desc">{{food.description}}</p>
+                  <div class="extra">
+                    <span class="count">月售{{food.sellCount}}份</span>
+                    <span>好评率{{food.rating}}%</span>
+                  </div>
+                  <div class="price">
+                    <span class="now">￥{{food.price}}</span>
+                    <span class="old" v-show="food.oldPrice">￥{{food.oldPrice}}</span>
+                  </div>
+                  <div class="cartcontrol-wrapper">
+                    <cartcontrol :food="food" :update-food-count="updateFoodCount"></cartcontrol>
+                  </div>
+                </div>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </div>
     </div>
+    <div v-show="false">food组件</div>
+  </div>
 </template>
+
 <script>
   import axios from 'axios'
   import BScroll from 'better-scroll'
@@ -61,23 +58,21 @@
       return {
         goods: [],
         supportClasses: ["decrease", "discount", "guarantee", "invoice", "special"],
-        tops: [], //数组里存放每个li的top值
+        tops: [],
         scrollY: 0
       }
     },
+
     created () {
       axios.get('/api2/goods')
         .then(response => {
           const result = response.data
-          console.log(result)
           if (result.code === OK) {
-            //更新数据
             this.goods = result.data
-            //下面的代码要延迟到界面更新完毕后执行，可用setTimeout,但延迟事时间不好控制
+            // 延迟到界面更新后执行
             /*setTimeout(() => {
               this._initScroll()
-            },300)*/
-            //$.nextTick(callback)将回调延迟到下次DOM元素更新完之后执行
+            }, 300)*/
             this.$nextTick(() => {
               this._initScroll()
               this._initTops()
@@ -85,19 +80,22 @@
           }
         })
     },
+
     methods: {
       _initScroll () {
-        //创建左边menu的scroll
-        new BScroll(this.$refs.menuWrapper,{
-          click: true //响应点击事件
+        // 创建menu的scroll
+        new BScroll(this.$refs.menuWrapper, {
+          click: true // 响应点击事件
         })
-        //创建右边foods的scroll
-        this.foodsScroll = new BScroll(this.$refs.foodsWrapper,{
-          probeType: 3 //手指move的时候出发scroll事件
+        // 创建foods的scroll
+        this.foodsScroll = new BScroll(this.$refs.foodsWrapper, {
+          probeType: 3, // 让scroll的回调函数被调用
+          click: true // 响应点击事件
         })
-        //监视foods的滚动
-        this.foodsScroll.on('scroll',(pos) => {
-          //console.log(pos.y)
+
+        // 监视foods的滚动
+        this.foodsScroll.on('scroll', (pos) => {
+          // console.log(pos.y)
           this.scrollY = Math.abs(pos.y)
         })
       },
@@ -105,7 +103,7 @@
         const tops = []
         let top = 0
         tops.push(top)
-        //获取所有对应的li
+        // 找到所有对应的lis
         const lis = this.$refs.foodsWrapper.getElementsByClassName('food-list-hook')
         for (var i = 0; i < lis.length; i++) {
           var li = lis[i]
@@ -116,32 +114,59 @@
         console.log(tops)
       },
 
-      clickMenuItem (index,event) {
-        //console.log(index,event)
-        //过滤到原生的回调（pc端会触发两次）
+      clickMenuItem (index, event) {
+        // console.log(index, event)
+        // 过滤原生事件的回调
         if(!event._constructed) {
           return
         }
+        // alert(index)
+        // 找到对应的li
         const lis = this.$refs.foodsWrapper.getElementsByClassName('food-list-hook')
         const li = lis[index]
-        //滑动到对应的li
-        this.foodsScroll.scrollToElement(li,300)
+        // 平滑滑动到li
+        this.foodsScroll.scrollToElement(li, 300)
+      },
+
+      updateFoodCount (food, isAdd, event) {
+        if(!event._constructed) {
+          return
+        }
+        console.log('updateFoodCount()')
+        if(isAdd) { // 增加1
+          if(!food.count) { // 第一次
+            // 添加新的属性count(没有数据绑定)
+            // food.count = 1
+            this.$set(food, 'count', 1) // 有数据绑定, 会更新界面
+          } else { // 不是一次
+            food.count++
+          }
+        } else { // 减少1
+          if(food.count) {
+            food.count--
+          }
+        }
       }
     },
+
     computed: {
-      currIndex () {//当前被选中的menu item的下标
-        const {tops,scrollY} = this
-        return tops.findIndex((top,index) => {
-          //scrollY大于或等于当前的top,且小于下一个top
+      currIndex () {  // 被选中的menu item的下标
+        const {tops, scrollY} = this
+        return tops.findIndex((top, index) => {
+          // 条件: scrollY大于或等于当前top, 且小于下一个top
           return scrollY>=top && scrollY<tops[index+1]
         })
       }
+    },
+
+    components: {
+      cartcontrol
     }
   }
-
 </script>
+
 <style lang="stylus" rel="stylesheet/stylus">
-  @import "../../common/stylus/mixin.styl"
+  @import "../../common/styuls/mixin.styl"
 
   .goods
     display: flex

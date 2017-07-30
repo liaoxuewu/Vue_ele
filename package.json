@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "axios": "^0.16.2",
+    "better-scroll": "^0.4.0",
     "mockjs": "^1.0.1-beta3",
     "stylus": "^0.54.5",
     "stylus-loader": "^3.0.1",
