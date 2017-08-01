@@ -36,6 +36,7 @@
         <img :src="seller.avatar" height="100%" width="100%">
       </div>
       <!--浮层-->
+      <transition name="fade">
       <div class="mask" v-show="maskShow">
         <div class="mask-wrapper clearfix">
           <div class="mask-main">
@@ -76,6 +77,7 @@
           <span class="icon-close"></span>
         </div>
       </div>
+      </transition>
     </div>
 </template>
 <script>
@@ -217,6 +219,10 @@
       height 100%
       background-color rgba(7,17,27,.8)
       overflow auto
+      &.fade-enter-active, &.fade-leave-active
+        transition: opacity .5s
+      &.fade-enter, &.fade-leave-to
+        opacity 0
       .mask-wrapper
         min-height 100%
         .mask-main

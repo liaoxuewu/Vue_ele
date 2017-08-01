@@ -1,121 +1,119 @@
 <template>
-    <div class="seller" ref="seller">
-      <div class="seller-content">
-        <div class="overview">
-          <h1 class="title">{{seller.name}}</h1>
-          <div class="desc border-1px">
-            <star :score="seller.score" :size="36"></star>
-            <span class="text">({{seller.sellCount}})</span>
-            <span class="text">月售单</span>
-          </div>
-          <ul class="remark">
-            <li class="block">
-              <h2>起送价</h2>
-              <div class="content">
-                <span class="stress">{{seller.minPrice}}</span>元
-              </div>
-            </li>
-            <li class="block">
-              <h2>起送价</h2>
-              <div class="content">
-                <span class="stress">{{seller.deliveryPrice}}</span>元
-              </div>
-            </li>
-            <li class="block">
-              <h2>评价配送时间</h2>
-              <div class="content">
-                <span class="stress">{{seller.deliveryTime}}</span>分钟
-              </div>
-            </li>
-          </ul>
-          <!--收藏-->
-          <div class="favorite" @click="toggleFavorite">
-            <span class="icon-favorite" :class="{active: favorite}"></span>
-            <span class="text">已收藏</span>
-          </div>
+  <div class="seller" ref="seller">
+    <div class="seller-content">
+
+      <div class="overview">
+        <h1 class="title">{{seller.name}}</h1>
+        <div class="desc border-1px">
+          <star :score="seller.score" :size="36"></star>
+          <span class="text">({{seller.sellCount}})</span>
+          <span class="text">月售单</span>
         </div>
+        <ul class="remark">
+          <li class="block"><h2>起送价</h2>
+            <div class="content">
+              <span class="stress">{{seller.minPrice}}</span>元
+            </div>
+          </li>
+          <li class="block"><h2>商家配送</h2>
+            <div class="content"><span class="stress">{{seller.deliveryPrice}}</span>元
+            </div>
+          </li>
+          <li class="block"><h2>平均配送时间</h2>
+            <div class="content"><span class="stress">{{seller.deliveryTime}}</span>分钟
+            </div>
+          </li>
+        </ul>
+        <div class="favorite" @click="toggleFavorite">
+          <span class="icon-favorite" :class="{active: favorite}"></span>
+          <span class="text">已收藏</span>
+        </div>
+      </div>
 
-        <split></split>
+      <split></split>
 
-        <div class="bulletin">
-          <h1 class="title">公告与活动</h1>
-          <div class="content-wrapper border-1px">
-            <p class="content">{{seller.bulletin}}</p>
-          </div>
-          <ul class="supports">
-            <li class="support-item border-1px" v-for="support in seller.supports">
-              <span class="icon" :class="supportClasses[support.type]"></span>
-              <span class="text">{{support.description}}</span>
+      <div class="bulletin">
+        <h1 class="title">公告与活动</h1>
+        <div class="content-wrapper border-1px">
+          <p class="content">{{seller.bulletin}}</p>
+        </div>
+        <ul class="supports">
+          <li class="support-item border-1px" v-for="support in seller.supports">
+            <span class="icon" :class="supportClasses[support.type]"></span>
+            <span class="text">{{support.description}}</span>
+          </li>
+        </ul>
+      </div>
+
+      <split></split>
+
+      <div class="pics">
+        <h1 class="title">商家实景</h1>
+        <div class="pic-wrapper" ref="picWrapper">
+          <ul class="pic-list" ref="picsUl">
+            <li class="pic-item" v-for="pic in seller.pics">
+              <img width="120" height="90" :src="pic">
             </li>
-          </ul>
-        </div>
-
-        <split></split>
-
-        <div class="pics">
-          <h1 class="title">商家实景</h1>
-          <div class="pic-wrapper" ref="picWrapper">
-            <ul class="pic-list" ref="picsUl">
-              <li class="pic-item" v-for="pic in seller.pics">
-                <img width="120" height="90" :src="pic">
-              </li>
-            </ul>
-          </div>
-        </div>
-
-        <split></split>
-
-        <div class="info">
-          <h1 class="title border-1px">商家信息</h1>
-          <ul>
-            <li class="info-item" v-for="info in seller.infos">{{info}}</li>
           </ul>
         </div>
       </div>
+
+      <split></split>
+
+      <div class="info">
+        <h1 class="title border-1px">商家信息</h1>
+        <ul>
+          <li class="info-item" v-for="info in seller.infos">{{info}}</li>
+        </ul>
+      </div>
     </div>
+  </div>
 </template>
+
 <script>
   import BScroll from 'better-scroll'
-  import star from '../star/star.vue'
   import split from '../split/split.vue'
+  import star from '../star/star.vue'
 
   export default {
     props: ['seller'],
     data () {
       return {
-        favorite: localStorage.getItem('favorite') === 'true',
-        /*supportClasses: ['decrease', 'discount', 'special', 'invoice', 'guarantee']*/
+        favorite: localStorage.getItem('favorite')==='true',
+        supportClasses: ['decrease', 'discount', 'special', 'invoice', 'guarantee']
       }
     },
+
     created () {
       this.supportClasses = ['decrease', 'discount', 'special', 'invoice', 'guarantee']
-      /*if(this.seller.name){
-        //
+      if(this.seller.name) {// seller是个带数据的对象(切换路由过来)
         this.showSeller()
-      }*/
+      }
 
     },
 
     methods: {
       showSeller () {
-        //如果scroll已经存在，就不用再创建
-        if(this.picsScroll){
+        // 如果已经存在, 不用再创建scroll对象
+        if(this.picsScroll) {
           return
         }
         this.$nextTick(() => {
-          //seller可能是个空对象（在当前路由组件页面刷新），也可能带数据（其他路由切换）
+          // 此时seller可能是一个空对象(在当前路由上刷新), 也可能是个带数据的对象(切换路由过来)
+          console.log(this.$refs.seller)
+
           this.scroll = new BScroll(this.$refs.seller, {
             click: true
           })
 
-          //水平方向商家图片ul需要指定宽度不然水平无法滑动
+          // 统计ul所需要的宽度
           const picWidth = 120
           const space = 6
           const imgCount = this.seller.pics.length
+          // 给ul设置样式宽度
+          this.$refs.picsUl.style.width = imgCount*(picWidth+space) - space + 'px'
 
-          this.$refs.picsUl.style.width = imgCount * (picWidth + space) + 'px'
-
-          //创建水平滚动的scroll对象
+          // 创建水平滑动的scroll
           this.picsScroll = new BScroll(this.$refs.picWrapper, {
             click: true,
             scrollX: true   // 滚动方向为水平方向
@@ -125,11 +123,13 @@
 
       toggleFavorite () {
         this.favorite = !this.favorite
-        //保存到本地存储
-        localStorage.setItem('favorite',this.favorite)
+        //保存到本地
+        localStorage.setItem('favorite', this.favorite)
       }
     },
-    updated () {//seller有数据，调用showSeller方法
+
+    updated () { // 此时seller变为有数据了, 显示数据
+      //alert('update()')
       this.showSeller()
     },
 
@@ -139,8 +139,9 @@
     }
   }
 </script>
+
 <style lang="stylus" rel="stylesheet/stylus">
-  @import "../../common/stylus/mixin.styl"
+  @import "../../common/styuls/mixin.styl"
 
   .seller
     position: absolute

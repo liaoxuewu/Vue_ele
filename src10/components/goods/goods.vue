@@ -18,7 +18,7 @@
           <li class="food-list food-list-hook" v-for="good in goods">
             <h1 class="title">{{good.name}}</h1>
             <ul>
-              <li class="food-item border-1px" v-for="food in good.foods">
+              <li class="food-item border-1px" v-for="food in good.foods" @click="clickFood(food)">
                 <div class="icon">
                   <img width="57" height="57" :src="food.icon">
                 </div>
@@ -43,9 +43,10 @@
         </ul>
       </div>
       <shopcart :min-price="seller.minPrice" :delivery-price="seller.deliveryPrice"
-                :foods="selectFoods" :update-food-count="updateFoodCount"></shopcart>
+                :foods="selectFoods" :update-food-count="updateFoodCount"
+                @clearSelectFoods="clearSelectFoods"></shopcart>
     </div>
-    <div v-show="false">food组件</div>
+    <food :food="food" :update-food-count="updateFoodCount" ref="food"></food>
   </div>
 </template>
 
@@ -54,6 +55,7 @@
   import BScroll from 'better-scroll'
   import cartcontrol from '../cartcontrol/cartcontrol.vue'
   import shopcart from '../shopcart/shopcart.vue'
+  import food from '../food/food.vue'
 
   const OK = 0
   export default {
@@ -66,7 +68,8 @@
         goods: [],
         supportClasses: ["decrease", "discount", "guarantee", "invoice", "special"],
         tops: [],
-        scrollY: 0
+        scrollY: 0,
+        food: {}
       }
     },
 
@@ -153,6 +156,19 @@
             food.count--
           }
         }
+      },
+
+      clearSelectFoods () {
+        this.selectFoods.forEach(food => {
+          food.count = 0
+        })
+      },
+
+      clickFood (food) {
+        // 设定food
+        this.food = food
+        // 显示food
+        this.$refs.food.show()
       }
     },
 
@@ -179,7 +195,8 @@
 
     components: {
       cartcontrol,
-      shopcart
+      shopcart,
+      food
     }
   }
 </script>

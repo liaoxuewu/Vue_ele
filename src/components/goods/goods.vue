@@ -19,7 +19,7 @@
             <li class="food-list food-list-hook" v-for="good in goods">
               <h2 class="title">{{good.name}}</h2>
               <ul>
-                <li class="food-item border-1px" v-for="food in good.foods">
+                <li class="food-item border-1px" v-for="food in good.foods" @click="clickFood(food)">
                   <!--食物图片-->
                   <div class="icon">
                     <img :src="food.icon" width="57" height="57">
@@ -46,23 +46,32 @@
             </li>
           </ul>
         </div>
+        <shopcart :min-price="seller.minPrice" :delivery-price="seller.deliveryPrice"
+                  :foods="selectFoods" :update-food-count="updateFoodCount"
+                  @clearSelectFoods="clearSelectFoods"></shopcart>
       </div>
-      <div>food组件</div>
+      <food :food="food" ref="food"></food>
     </div>
 </template>
 <script>
   import axios from 'axios'
   import BScroll from 'better-scroll'
   import cartcontrol from '../cartcontrol/cartcontrol.vue'
+  import shopcart from '../shopcart/shopcart.vue'
+  import food from '../food/food.vue'
 
   const OK = 0
   export default {
+    props: {
+      seller: Object
+    },
     data () {
       return {
         goods: [],
         supportClasses: ["decrease", "discount", "guarantee", "invoice", "special"],
         tops: [], //数组里存放每个li的top值
-        scrollY: 0
+        scrollY: 0,
+        food:{}
       }
     },
     created () {
@@ -147,6 +156,18 @@
           }
         }
       },
+
+      clearSelectFoods () {
+        this.selectFoods.forEach(food => {
+          food.count = 0
+        })
+      },
+
+      clickFood (food) {
+        this.food = food
+        //显示food
+        this.$refs.food.show()
+      }
     },
 
 
@@ -157,10 +178,23 @@
           //scrollY大于或等于当前的top,且小于下一个top
           return scrollY>=top && scrollY<tops[index+1]
         })
+      },
+      selectFoods () {
+        const foods = []
+        this.goods.forEach(good => {
+          good.foods.forEach(food => {
+            if(food.count){
+              foods.push(food)
+            }
+          })
+        })
+        return foods
       }
     },
     components: {
-      cartcontrol
+      cartcontrol,
+      shopcart,
+      food
     }
   }
 

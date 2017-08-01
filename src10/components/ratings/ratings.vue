@@ -1,141 +1,133 @@
 <template>
   <div class="ratings" ref="ratings">
-    <scroller>
-      <div class="ratings-content">
-
-        <div class="overview">
-          <div class="overview-left">
-            <h1 class="score">{{seller.score}}</h1>
-            <div class="title">综合评分</div>
-            <div class="rank">高于周边商家{{seller.rankRate}}%</div>
-          </div>
-          <div class="overview-right">
-            <div class="score-wrapper">
-              <span class="title">服务态度</span>
-              <star :score="seller.serviceScore" :size="36"></star>
-              <span class="score">{{seller.serviceScore}}</span>
-            </div>
-            <div class="score-wrapper">
-              <span class="title">商品评分</span>
-              <star :score="seller.foodScore" :size="36"></star>
-              <span class="score">{{seller.foodScore}}</span>
-            </div>
-            <div class="delivery-wrapper">
-              <span class="title">送达时间</span>
-              <span class="delivery">{{seller.deliveryTime}}分钟</span>
-            </div>
-          </div>
+    <div class="ratings-content">
+      <div class="overview">
+        <div class="overview-left">
+          <h1 class="score">{{seller.score}}</h1>
+          <div class="title">综合评分</div>
+          <div class="rank">高于周边商家{{seller.rankRate}}%</div>
         </div>
 
-        <split></split>
+        <div class="overview-right">
+          <div class="score-wrapper">
+            <span class="title">服务态度</span>
+            <star :score="seller.serviceScore" :size="36"></star>
+            <span class="score">{{seller.serviceScore}}</span>
+          </div>
 
-        <ratingselect :desc="desc" :only-content="onlyContent" :ratings="ratings"
-                      :select-type="selectType"
-                      @setSelectType="setSelectType"
-                      @switchOnlyContent="switchOnlyContent"></ratingselect>
+          <div class="score-wrapper">
+            <span class="title">商品评分</span>
+            <star :score="seller.foodScore" :size="36"></star>
+            <span class="score">{{seller.foodScore}}</span>
+          </div>
 
-        <div class="rating-wrapper">
-          <ul>
-            <li class="rating-item" v-for="rating in filterRatings">
-              <div class="avatar">
-                <img width="28" height="28" :src="rating.avatar">
-              </div>
-              <div class="content">
-                <h1 class="name">{{rating.username}}</h1>
-                <div class="star-wrapper">
-                  <star :score="rating.score" :size="24"></star>
-                  <span class="delivery">{{rating.deliveryTime}}</span>
-                </div>
-                <p class="text">{{rating.text}}</p>
-                <div class="recommend">
-                  <span :class="rating.rateType===0?'icon-thumb_up':'icon-thumb_down'"></span>
-                  <span class="item" v-for="item in rating.recommend">{{item}}</span>
-                </div>
-                <div class="time">
-                  {{rating.rateTime | date-string}}
-                </div>
-              </div>
-            </li>
-          </ul>
+          <div class="delivery-wrapper">
+            <span class="title">送达时间</span>
+            <span class="delivery">{{seller.deliveryTime}}分钟</span>
+          </div>
         </div>
       </div>
-    </scroller>
+
+      <split></split>
+
+      <ratingselect :ratings="ratings"
+                    :content-only="contentOnly"
+                    :select-type="selectType"
+                    :desc="{all:'全部', positive:'推荐', negative:'吐糟'}"
+                    @toggleContentOnly="toggleContentOnly"
+                    @setSelectType="setSelectType"></ratingselect>
+
+
+      <div class="rating-wrapper">
+        <ul>
+          <li class="rating-item" v-for="rating in filterRatings">
+            <div class="avatar">
+              <img width="28" height="28" :src="rating.avatar">
+            </div>
+
+            <div class="content">
+              <h1 class="name">{{rating.username}}</h1>
+              <div class="star-wrapper">
+                <star :score="rating.score" :size="24"></star>
+                <span class="delivery">{{rating.deliveryTime}}</span>
+              </div>
+              <p class="text">{{rating.text}}</p>
+              <div class="recommend">
+                <span :class="rating.rateType===0 ? 'icon-thumb_up' : 'icon-thumb_down'"></span>
+                <span class="item" v-for="item in rating.recommend">{{item}}</span>
+              </div>
+              <div class="time">
+                {{rating.rateTime | date}}
+              </div>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
-  import BScroll from 'better-scroll'
   import axios from 'axios'
+  import BScroll from 'better-scroll'
   import star from '../star/star.vue'
   import split from '../split/split.vue'
   import ratingselect from '../ratingselect/ratingselect.vue'
 
   export default {
     props: ['seller'],
+
     data () {
       return {
         ratings: [],
-        onlyContent: false,
-        selectType: 2
+        contentOnly: false,
+        selectType: 0,
       }
     },
 
     created () {
-      this.desc = {
-        all: '全部',
-        positive: '满意',
-        nagetive: '不满意'
-      }
       axios.get('/api2/ratings')
         .then(response => {
           const result = response.data
           if (result.code === 0) {
             this.ratings = result.data
 
-            /*this.$nextTick(() => {
+            this.$nextTick(() => {
               this.scroll = new BScroll(this.$refs.ratings, {
                 click: true
               })
-            })*/
+            })
           }
         })
     },
 
     methods: {
-      setSelectType (selectType) {
-        this.selectType = selectType
-
-       /* this.$nextTick(() => {
-          // 刷新列表的Scroll对象
+      toggleContentOnly () {
+        this.contentOnly = !this.contentOnly
+        // 异步刷新滚动
+        this.$nextTick(() => {
           this.scroll.refresh()
-        })*/
+        })
       },
 
-      switchOnlyContent () {
-        this.onlyContent = !this.onlyContent
-
-       /* this.$nextTick(() => {
-          // 刷新列表的Scroll对象
+      setSelectType (selectType) {
+        this.selectType = selectType
+        // 异步刷新滚动
+        this.$nextTick(() => {
           this.scroll.refresh()
-        })*/
+        })
       }
     },
 
     computed: {
       filterRatings () {
-        if(!this.ratings) {
-          return
-        }
-        const {selectType, onlyContent} = this
-        // selectType: 0, 1, 2
-        // onlyContent: true false
-        return this.ratings.filter(rating => {
+        const {ratings, contentOnly, selectType} = this
+        return  ratings.filter(rating => {
+          const {text, rateType} = rating
           if(selectType===2) {
-            // 如果onlyContent为false, 直接返回true, 否则还要看text有没有值
-            return !onlyContent || !!rating.text
+            return !contentOnly || !!text
           } else {
-            // 既要比较type, 还要比较content
-            return selectType=== rating.rateType && (!onlyContent || !!rating.text)
+            return selectType===rateType && (!contentOnly || !!text)
           }
         })
       }
@@ -150,7 +142,7 @@
 </script>
 
 <style lang="stylus" rel="stylesheet/stylus">
-  @import "../../common/stylus/mixins.styl"
+  @import "../../common/styuls/mixin.styl"
 
   .ratings
     position: absolute
@@ -199,7 +191,7 @@
             vertical-align: top
             font-size: 12px
             color: rgb(7, 17, 27)
-          .star
+          .stars
             display: inline-block
             margin: 0 12px
             vertical-align: top
@@ -242,7 +234,7 @@
           .star-wrapper
             margin-bottom: 6px
             font-size: 0
-            .star
+            .stars
               display: inline-block
               margin-right: 6px
               vertical-align: top
